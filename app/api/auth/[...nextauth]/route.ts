@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import CredentialsProvider from "next-auth/providers/credentials";
 import AdminUser from "../../../../server/models/adminUser";
 import connectDB from "@/server/config/db";
+import { verifyRecaptcha } from "../../../../lib/verifyRecaptcha";
 
 import dotenv from "dotenv";
 
@@ -17,9 +18,22 @@ const handler = NextAuth({
       credentials: {
         email: {},
         password: {},
+        recaptchaToken: {},
       },
       async authorize(credentials) {
         try {
+          // Verify reCAPTCHA first
+          if (!credentials?.recaptchaToken) {
+            throw new Error("reCAPTCHA verification required");
+          }
+
+          const isRecaptchaValid = await verifyRecaptcha(
+            credentials.recaptchaToken
+          );
+          if (!isRecaptchaValid) {
+            throw new Error("reCAPTCHA verification failed");
+          }
+
           // Connect to the database
           await connectDB();
           if (!credentials?.email || !credentials?.password) {
