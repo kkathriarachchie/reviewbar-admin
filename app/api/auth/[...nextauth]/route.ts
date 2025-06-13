@@ -1,16 +1,17 @@
 import NextAuth from "next-auth";
 import bcrypt from "bcryptjs";
 import CredentialsProvider from "next-auth/providers/credentials";
-import AdminUser from "../../../../server/models/adminUser";
-import connectDB from "@/server/config/db";
 import { verifyRecaptcha } from "../../../../lib/verifyRecaptcha";
-
+import { getDatabaseConnection } from "@/server/config/db";
+import { getAdminUserModel } from "@/server/models/adminUserModels";
 import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 const handler = NextAuth({
   session: {
     strategy: "jwt",
+    maxAge: 15 * 60, // 15 minutes
+    updateAge: 1 * 60, // 1 minute
   },
   providers: [
     CredentialsProvider({
@@ -35,7 +36,9 @@ const handler = NextAuth({
           }
 
           // Connect to the database
-          await connectDB();
+          const conn = await getDatabaseConnection("reviewbar-admin");
+          const AdminUser = getAdminUserModel(conn);
+
           if (!credentials?.email || !credentials?.password) {
             throw new Error("Email and password are required");
           }

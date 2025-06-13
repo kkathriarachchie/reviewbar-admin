@@ -1,44 +1,59 @@
 "use client";
 
-import { AppSidebar } from "@/components/app-sidebar";
-import { ChartAreaInteractive } from "@/components/chart-area-interactive";
-import { DataTable } from "@/components/data-table";
-import { SectionCards } from "@/components/section-cards";
-import { SiteHeader } from "@/components/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
-import data from "./data.json";
+import { Card } from "@/components/ui/card";
+import {
+  IconUsers,
+  IconChartBar,
+  IconFileDescription,
+} from "@tabler/icons-react";
 
-export default function Page() {
-  const { data: session, status } = useSession();
-
-  if (status === "loading") {
-    return <div>Loading...</div>;
-  }
-
-  if (!session) {
-    redirect("/sign-in");
-  }
-
+export default function DashboardPage() {
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as React.CSSProperties
-      }
-    >
-      <AppSidebar variant="inset" />
-      <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6"></div>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Dashboard Overview</h1>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Card className="p-6">
+          <div className="flex items-center gap-4">
+            <IconUsers className="h-8 w-8 text-blue-500" />
+            <div>
+              <p className="text-sm text-gray-500">Total Users</p>
+              <h3 className="text-2xl font-bold">1,234</h3>
+            </div>
           </div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center gap-4">
+            <IconChartBar className="h-8 w-8 text-green-500" />
+            <div>
+              <p className="text-sm text-gray-500">Active Reviews</p>
+              <h3 className="text-2xl font-bold">856</h3>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center gap-4">
+            <IconFileDescription className="h-8 w-8 text-purple-500" />
+            <div>
+              <p className="text-sm text-gray-500">Total Proposals</p>
+              <h3 className="text-2xl font-bold">432</h3>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Recent Activity */}
+      <section className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+        <Card className="p-6">
+          {/* Add your activity list or table here */}
+        </Card>
+      </section>
+
+      {/* Additional dashboard widgets can be added here */}
+    </div>
   );
 }

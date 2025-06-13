@@ -1,8 +1,9 @@
 import bcrypt from "bcryptjs";
 import express, { Request, Response } from "express";
-import AdminUser from "../models/adminUser";
 import { IAdminUser } from "../DTO/dto";
 import { v4 as uuidv4 } from "uuid";
+import { getDatabaseConnection } from "../config/db";
+import { getAdminUserModel } from "../models/adminUserModels";
 
 const router = express.Router();
 
@@ -11,8 +12,11 @@ interface AddAdminRequest extends Request {
 }
 
 // POST endpoint for admin registration
-router.post("/admin/register", async (req: AddAdminRequest, res: Response) => {
+router.post("/register", async (req: AddAdminRequest, res: Response) => {
   try {
+    const conn = await getDatabaseConnection("reviewbar-admin");
+    const AdminUser = getAdminUserModel(conn);
+
     const { name, email, password } = req.body;
 
     // Check if admin already exists
@@ -32,8 +36,6 @@ router.post("/admin/register", async (req: AddAdminRequest, res: Response) => {
       name,
       email,
       password: hashedPassword,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
 
     // Save admin to database
@@ -44,7 +46,6 @@ router.post("/admin/register", async (req: AddAdminRequest, res: Response) => {
       user_id: newAdmin.user_id,
       name: newAdmin.name,
       email: newAdmin.email,
-      createdAt: newAdmin.createdAt,
     };
 
     res.status(201).json({
@@ -56,5 +57,4 @@ router.post("/admin/register", async (req: AddAdminRequest, res: Response) => {
     res.status(500).json({ message: "Server error during registration" });
   }
 });
-
 export default router;
