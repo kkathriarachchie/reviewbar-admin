@@ -15,3 +15,9 @@ export interface DeleteResponse {
   success: boolean;
   message: string;
 }
+
+export interface TopReviewedProduct {
+  upc: string;
+  reviewCount: number;
+  reviews: { rating: string }[];
+}

@@ -17,6 +17,7 @@ router.get(
 
       if (!product) {
         res.status(404).json({ message: "Product not found" });
+
         return;
       }
 
@@ -72,6 +73,75 @@ router.delete(
         success: false,
         message: "Server error",
         details: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+);
+
+router.get(
+  "/count",
+  async (_req: express.Request, res: express.Response): Promise<void> => {
+    try {
+      const conn = await getDatabaseConnection("reviewbar-products");
+      const Product = getProductModel(conn);
+
+      const count = await Product.countDocuments();
+
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching product count:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
+
+router.get(
+  "/active-total-reviews",
+  async (_req: express.Request, res: express.Response) => {
+    try {
+      const conn = await getDatabaseConnection("reviewbar-products");
+      const Product = getProductModel(conn);
+
+      // Aggregate to sum the length of reviews arrays for all products
+      const result = await Product.aggregate([
+        { $project: { reviewCount: { $size: "$reviews" } } },
+        { $group: { _id: null, activeTotalReviews: { $sum: "$reviewCount" } } },
+      ]);
+
+      const total = result[0]?.activeTotalReviews || 0;
+
+      res.json({ total });
+    } catch (error) {
+      console.error("Error fetching total reviews:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
+
+router.get(
+  "/top-reviewed",
+  async (_req: express.Request, res: express.Response) => {
+    try {
+      const conn = await getDatabaseConnection("reviewbar-products");
+      const Product = getProductModel(conn);
+
+      const topProducts = await Product.aggregate([
+        {
+          $project: {
+            upc: 1,
+            reviewCount: { $size: "$reviews" },
+            reviews: 1,
+            _id: 0,
+          },
+        },
+        { $sort: { reviewCount: -1, upc: 1 } },
+        { $limit: 10 },
+      ]);
+      res.json(topProducts);
+    } catch (err: unknown) {
+      res.status(500).json({
+        error: "Server Error",
+        details: err instanceof Error ? err.message : "Unknown error",
       });
     }
   }

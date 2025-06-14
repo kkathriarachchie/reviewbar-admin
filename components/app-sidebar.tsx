@@ -32,6 +32,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import Image from "next/image";
 
 const data = {
   user: {
@@ -51,8 +52,8 @@ const data = {
       icon: IconListDetails,
     },
     {
-      title: "Analytics",
-      url: "/dashboard/analytics",
+      title: "Top Products",
+      url: "/dashboard/top-products",
       icon: IconChartBar,
     },
   ],
@@ -151,9 +152,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="#">
-                <span className="text-xl font-semibold  text-[oklch(75.56%_0.182_142.9)]">
-                  ReviewBar
-                </span>
+                <div className="flex flex-row items-center gap-2">
+                  <Image
+                    src="/favicon.ico"
+                    alt="ReviewBar Icon"
+                    width={25}
+                    height={25}
+                  />
+                  <span className="mt-1 text-2xl font-semibold text-[oklch(75.56%_0.182_142.9)]">
+                    ReviewBar
+                  </span>
+                </div>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

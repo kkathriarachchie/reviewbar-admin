@@ -9,17 +9,18 @@ export function LoadingScreen({ message = "Loading..." }: LoadingScreenProps) {
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
       <div className="flex flex-col items-center justify-center space-y-8">
         <div className="space-y-2">
-          <Skeleton className="h-8 w-[250px] bg-muted/50" />
-          <Skeleton className="h-8 w-[200px] bg-muted/50" />
+          <Skeleton className="h-8 w-[250px]  bg-white" />
         </div>
 
         <div className="flex flex-col items-center justify-center space-y-4">
           <div className="flex space-x-2">
-            <div className="h-4 w-4 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
-            <div className="h-4 w-4 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
-            <div className="h-4 w-4 animate-bounce rounded-full bg-primary" />
+            <div className="h-4 w-4 animate-bounce rounded-full bg-[oklch(75.56%_0.182_142.9)] [animation-delay:-0.3s] " />
+            <div className="h-4 w-4 animate-bounce rounded-full bg-[oklch(75.56%_0.182_142.9)] [animation-delay:-0.15s]" />
+            <div className="h-4 w-4 animate-bounce rounded-full bg-[oklch(75.56%_0.182_142.9)]" />
           </div>
-          <p className="text-sm text-muted-foreground">{message}</p>
+          <p className="text-sm text-muted-foreground sm:text-base">
+            {message}
+          </p>
         </div>
       </div>
     </div>
