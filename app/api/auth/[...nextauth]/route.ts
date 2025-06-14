@@ -25,14 +25,14 @@ const handler = NextAuth({
         try {
           // Verify reCAPTCHA first
           if (!credentials?.recaptchaToken) {
-            throw new Error("reCAPTCHA verification required");
+            return Promise.reject(new Error("reCAPTCHA verification required"));
           }
 
           const isRecaptchaValid = await verifyRecaptcha(
             credentials.recaptchaToken
           );
           if (!isRecaptchaValid) {
-            throw new Error("reCAPTCHA verification failed");
+            return Promise.reject(new Error("reCAPTCHA verification failed"));
           }
 
           // Connect to the database
@@ -40,14 +40,14 @@ const handler = NextAuth({
           const AdminUser = getAdminUserModel(conn);
 
           if (!credentials?.email || !credentials?.password) {
-            throw new Error("Email and password are required");
+            return Promise.reject(new Error("Email and password are required"));
           }
 
           // Find the user by email
           const user = await AdminUser.findOne({ email: credentials.email });
 
           if (!user) {
-            throw new Error("No user found with the given email");
+            return Promise.reject(new Error("Email address not found"));
           }
 
           // Check if the password matches
@@ -57,7 +57,7 @@ const handler = NextAuth({
           );
 
           if (!isPasswordValid) {
-            throw new Error("Invalid password");
+            return Promise.reject(new Error("Invalid password"));
           }
 
           // Return the user object without the password

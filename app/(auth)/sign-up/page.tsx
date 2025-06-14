@@ -12,6 +12,8 @@ import { registerAdmin } from "@/app/services/adminApi";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { signUpSchema, type SignUpFormData } from "@/validation/signUpSchema";
+import z from "zod";
 
 export default function Page({
   className,
@@ -24,42 +26,55 @@ export default function Page({
     password: "",
     confirmPassword: "",
   });
-
+  const [errors, setErrors] = useState<Partial<SignUpFormData>>({});
   const [pending, setPending] = useState(false);
 
+  const validateField = (field: keyof SignUpFormData, value: string) => {
+    try {
+      // Access the inner schema before validation
+      const innerSchema = signUpSchema._def.schema;
+      const fieldSchema = z.object({ [field]: innerSchema.shape[field] });
+
+      fieldSchema.parse({ [field]: value });
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        setErrors((prev) => ({ ...prev, [field]: error.errors[0].message }));
+      }
+      return false;
+    }
+  };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPending(true);
 
     try {
-      // Validate passwords match
-      if (formData.password !== formData.confirmPassword) {
-        toast.error("Passwords do not match");
-        return;
-      }
+      // Validate all fields
+      const validatedData = signUpSchema.parse(formData);
 
       // Call the register service
       const response = await registerAdmin({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
+        name: validatedData.name,
+        email: validatedData.email,
+        password: validatedData.password,
       });
 
-      // Handle successful registration
       toast.success("Registration successful! Redirecting to login...");
-      // You can redirect the user or show a success message
       console.log("Registration successful:", response);
       setTimeout(() => {
-        // Add your redirect logic here
         router.push("/sign-in");
       }, 2000);
-      // You can redirect to login or dashboard here
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Registration failed"
-      );
-      console.error("Registration error:", error);
-      // Handle error (you might want to show an error message to the user)
+      if (error instanceof z.ZodError) {
+        error.errors.forEach((err) => {
+          toast.error(err.message);
+        });
+      } else {
+        toast.error(
+          error instanceof Error ? error.message : "Registration failed"
+        );
+      }
     } finally {
       setPending(false);
     }
@@ -85,18 +100,25 @@ export default function Page({
                       </p>
                     </div>
                     <div className="grid gap-3">
-                      <Label htmlFor="email">Full Name</Label>
+                      <Label htmlFor="name">Full Name</Label>
                       <Input
                         id="name"
                         type="text"
                         disabled={pending}
                         value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData((prev) => ({ ...prev, name: value }));
+                          validateField("name", value);
+                        }}
                         placeholder="John Doe"
                         required
                       />
+                      {errors.name && (
+                        <span className="text-sm text-red-500">
+                          {errors.name}
+                        </span>
+                      )}
                     </div>
                     <div className="grid gap-3">
                       <Label htmlFor="email">Email</Label>
@@ -105,12 +127,19 @@ export default function Page({
                         type="email"
                         disabled={pending}
                         value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData((prev) => ({ ...prev, email: value }));
+                          validateField("email", value);
+                        }}
                         placeholder="JohnDoe@example.com"
                         required
                       />
+                      {errors.email && (
+                        <span className="text-sm text-red-500">
+                          {errors.email}
+                        </span>
+                      )}
                     </div>
                     <div className="grid gap-3">
                       <div className="flex items-center">
@@ -121,15 +150,22 @@ export default function Page({
                         type="password"
                         disabled={pending}
                         value={formData.password}
-                        onChange={(e) =>
-                          setFormData({ ...formData, password: e.target.value })
-                        }
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData((prev) => ({ ...prev, password: value }));
+                          validateField("password", value);
+                        }}
                         required
                       />
+                      {errors.password && (
+                        <span className="text-sm text-red-500">
+                          {errors.password}
+                        </span>
+                      )}
                     </div>
                     <div className="grid gap-3">
                       <div className="flex items-center">
-                        <Label htmlFor="ConfirmPassword">
+                        <Label htmlFor="confirmPassword">
                           Confirm password
                         </Label>
                       </div>
@@ -138,14 +174,21 @@ export default function Page({
                         type="password"
                         disabled={pending}
                         value={formData.confirmPassword}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            confirmPassword: e.target.value,
-                          })
-                        }
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData((prev) => ({
+                            ...prev,
+                            confirmPassword: value,
+                          }));
+                          validateField("confirmPassword", value);
+                        }}
                         required
                       />
+                      {errors.confirmPassword && (
+                        <span className="text-sm text-red-500">
+                          {errors.confirmPassword}
+                        </span>
+                      )}
                     </div>
                     <Button
                       type="submit"

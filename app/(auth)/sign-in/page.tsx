@@ -13,25 +13,8 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { GoogleReCaptchaProvider } from "@google-recaptcha/react";
 import { ReCaptcha } from "@/components/ReCaptcha";
-
-const getErrorMessage = (error: string | undefined) => {
-  switch (error) {
-    case "missing_credentials":
-      return "Please enter both email and password";
-    case "recaptcha_required":
-      return "Please complete the reCAPTCHA verification";
-    case "recaptcha_invalid":
-      return "reCAPTCHA verification failed. Please try again";
-    case "user_not_found":
-      return "No account found with this email";
-    case "invalid_password":
-      return "Invalid password. Please try again";
-    case "server_error":
-      return "Server error. Please try again later";
-    default:
-      return "An unexpected error occurred";
-  }
-};
+import { signInSchema, type SignInFormData } from "@/validation/signInSchema";
+import { z } from "zod";
 
 export default function Page({
   className,
@@ -44,38 +27,60 @@ export default function Page({
   }
 
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState<SignInFormData>({
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState<Partial<SignInFormData>>({});
   const [pending, setPending] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
+  const validateField = (field: keyof SignInFormData, value: string) => {
+    try {
+      const fieldSchema = z.object({ [field]: signInSchema.shape[field] });
+
+      fieldSchema.parse({ [field]: value });
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        setErrors((prev) => ({ ...prev, [field]: error.errors[0].message }));
+      }
+      return false;
+    }
+  };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     setPending(true);
 
     try {
+      // Validate all fields
+      const validatedData = signInSchema.parse(formData);
+
       const result = await signIn("credentials", {
         redirect: false,
-        email,
-        password,
+        email: validatedData.email,
+        password: validatedData.password,
         recaptchaToken,
       });
 
       if (result?.ok) {
-        toast.success("Logged in successfully!");
+        toast.success("Welcome back!");
         router.push("/dashboard");
       } else {
-        const errorMessage = result?.error || "An unexpected error occurred";
-        toast.error(errorMessage);
+        toast.error(result?.error || "Login failed");
       }
     } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Failed to connect to authentication service");
+      if (error instanceof z.ZodError) {
+        error.errors.forEach((err) => {
+          toast.error(err.message);
+        });
+      } else {
+        toast.error("Connection error. Please check your internet connection");
+      }
     } finally {
       setPending(false);
       setRecaptchaToken(null);
-      // Reset the reCAPTCHA widget with proper typing
       if (typeof window !== "undefined") {
         (window as unknown as WindowWithRecaptcha).grecaptcha.reset();
       }
@@ -108,12 +113,21 @@ export default function Page({
                         <Input
                           id="email"
                           type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          value={formData.email}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setFormData((prev) => ({ ...prev, email: value }));
+                            validateField("email", value);
+                          }}
                           disabled={pending}
                           placeholder="m@example.com"
                           required
                         />
+                        {errors.email && (
+                          <span className="text-sm text-red-500">
+                            {errors.email}
+                          </span>
+                        )}
                       </div>
                       <div className="grid gap-3">
                         <div className="flex items-center">
@@ -128,11 +142,23 @@ export default function Page({
                         <Input
                           id="password"
                           type="password"
-                          required
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
+                          value={formData.password}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setFormData((prev) => ({
+                              ...prev,
+                              password: value,
+                            }));
+                            validateField("password", value);
+                          }}
                           disabled={pending}
+                          required
                         />
+                        {errors.password && (
+                          <span className="text-sm text-red-500">
+                            {errors.password}
+                          </span>
+                        )}
                       </div>
                       <div className="flex justify-center">
                         <ReCaptcha onVerify={setRecaptchaToken} />
