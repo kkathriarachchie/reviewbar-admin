@@ -46,12 +46,10 @@ const Page = () => {
               <span className="font-semibold text-lg">UPC: {product.upc}</span>
 
               <Button
-                variant="ghost"
                 onClick={() => handleSearch(product.upc)}
-                className="flex items-center gap-2 bg-[oklch(75.56%_0.182_142.9)] hover:bg-foreground"
+                className="flex h-8 w-13 items-center gap-2 bg-[oklch(75.56%_0.182_142.9)] font-medium text-base"
               >
-                <Search className="h-5 w-5 text-white font-bold" />
-                <span className=" text-white font-semibold">View</span>
+                <span className="mt-1">View</span>
               </Button>
             </CardHeader>
             <CardContent>

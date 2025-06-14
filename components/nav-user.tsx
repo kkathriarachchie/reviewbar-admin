@@ -80,7 +80,7 @@ export function NavUser({
             align="end"
             sideOffset={4}
           >
-            <DropdownMenuLabel className="p-0 font-normal">
+            <DropdownMenuLabel className="p-0 font-normal ">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={image || ""} alt={name || ""} />
@@ -98,7 +98,7 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem className="hover:!bg-[#d9fdde] hover:!text-[#202020]">
                 <IconUserCircle />
                 Account
               </DropdownMenuItem>
@@ -111,6 +111,7 @@ export function NavUser({
                   callbackUrl: "/sign-in",
                 })
               }
+              className="hover:!bg-[#d9fdde] hover:!text-[#202020]"
             >
               <IconLogout />
               Log out

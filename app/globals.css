@@ -121,3 +121,24 @@
     @apply bg-background text-foreground;
   }
 }
+
+button:hover,
+a:hover,
+.hover-element:hover {
+  background-color: #d9fdde !important;
+  color: #202020 !important;
+}
+
+@keyframes fade-up-down {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-fade-up-down {
+  animation: fade-up-down 2s ease-in-out infinite;
+}

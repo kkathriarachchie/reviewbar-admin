@@ -32,6 +32,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta
+          content="upgrade-insecure-requests"
+          httpEquiv="Content-Security-Policy"
+        />
+      </head>
       <body
         className={`${balooBhaijaan.variable} ${poppins.variable} ${geistMono.variable} font-sans antialiased`}
       >

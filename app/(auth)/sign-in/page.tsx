@@ -14,10 +14,35 @@ import { signIn } from "next-auth/react";
 import { GoogleReCaptchaProvider } from "@google-recaptcha/react";
 import { ReCaptcha } from "@/components/ReCaptcha";
 
+const getErrorMessage = (error: string | undefined) => {
+  switch (error) {
+    case "missing_credentials":
+      return "Please enter both email and password";
+    case "recaptcha_required":
+      return "Please complete the reCAPTCHA verification";
+    case "recaptcha_invalid":
+      return "reCAPTCHA verification failed. Please try again";
+    case "user_not_found":
+      return "No account found with this email";
+    case "invalid_password":
+      return "Invalid password. Please try again";
+    case "server_error":
+      return "Server error. Please try again later";
+    default:
+      return "An unexpected error occurred";
+  }
+};
+
 export default function Page({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  interface WindowWithRecaptcha extends Window {
+    grecaptcha: {
+      reset: () => void;
+    };
+  }
+
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,11 +51,6 @@ export default function Page({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    if (!recaptchaToken) {
-      toast.error("Please complete the reCAPTCHA verification");
-      return;
-    }
 
     setPending(true);
 
@@ -44,9 +64,8 @@ export default function Page({
 
       if (result?.ok) {
         toast.success("Logged in successfully!");
-        router.push("/dashboard"); // Changed from "/" to "/dashboard"
+        router.push("/dashboard");
       } else {
-        // Handle different error cases
         const errorMessage = result?.error || "An unexpected error occurred";
         toast.error(errorMessage);
       }
@@ -54,10 +73,14 @@ export default function Page({
       console.error("Login error:", error);
       toast.error("Failed to connect to authentication service");
     } finally {
-      setPending(false); // Moved to finally block to ensure it always runs
+      setPending(false);
+      setRecaptchaToken(null);
+      // Reset the reCAPTCHA widget with proper typing
+      if (typeof window !== "undefined") {
+        (window as unknown as WindowWithRecaptcha).grecaptcha.reset();
+      }
     }
   };
-
   return (
     <>
       <Toaster richColors position="top-center" />
@@ -189,9 +212,9 @@ export default function Page({
                   </form>
                   <div className="bg-muted relative hidden md:block">
                     <img
-                      src="/placeholder.svg"
+                      src="/Login-Image.png"
                       alt="Image"
-                      className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+                      className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale object-[57%_90%] "
                     />
                   </div>
                 </CardContent>

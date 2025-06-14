@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/Tables/data-table";
 import { Review } from "@/app/DTO/productDto";
+import { cn } from "@/lib/utils";
 
 interface ReviewsTableProps {
   reviews: Review[];
@@ -38,6 +39,9 @@ export function ReviewsTable({
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
+          className={cn(
+            "data-[state=checked]:bg-[oklch(75.56%_0.182_142.9)] data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-[oklch(75.56%_0.182_142.9)] data-[state=checked]:border-[oklch(75.56%_0.182_142.9)]"
+          )}
         />
       ),
       cell: ({ row }) => (
@@ -45,6 +49,9 @@ export function ReviewsTable({
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
+          className={cn(
+            "data-[state=checked]:bg-[oklch(75.56%_0.182_142.9)] data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-[oklch(75.56%_0.182_142.9)] data-[state=checked]:border-[oklch(75.56%_0.182_142.9)]"
+          )}
         />
       ),
       enableSorting: false,
@@ -158,11 +165,13 @@ export function ReviewsTable({
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
+                className="hover:!bg-[#d9fdde] hover:!text-[#202020]"
                 onClick={() => navigator.clipboard.writeText(review.review_id)}
               >
                 Copy review ID
               </DropdownMenuItem>
               <DropdownMenuItem
+                className="hover:!bg-[#d9fdde] hover:!text-[#202020]"
                 onClick={() => navigator.clipboard.writeText(review.email)}
               >
                 Copy email
@@ -170,7 +179,7 @@ export function ReviewsTable({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => onDeleteReview(review.review_id)}
-                className="text-red-600"
+                className="text-red-600 hover:!bg-[#ffd4d4] hover:!text-[#202020]"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete review
