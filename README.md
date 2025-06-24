@@ -2,6 +2,8 @@
 
 A comprehensive admin dashboard for managing the ReviewBar product review system, built with Next.js and modern web technologies.
 
+![REVIEWBAR-ADMIN](/public/Screenshots/REVIEWBAR-ADMIN.png)
+
 ## 🌟 Description
 
 ReviewBar Admin is the administrative interface for the ReviewBar ecosystem - an innovative product review platform that leverages Universal Product Codes (UPC) to provide real-time access to authentic product reviews. In today's fast-paced retail environment, consumers are overwhelmed with product choices and need reliable, easily accessible information to make informed purchasing decisions.
